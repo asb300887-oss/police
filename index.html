@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة القيادة العسكرية الرقمية</title>
+    <title>منظومة السيطرة والتجنيد العسكري</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a252f 0%, #11171d 100%);
+            background: radial-gradient(circle at center, #162431 0%, #080d12 100%);
             color: #ffffff;
             min-height: 100vh;
             display: flex;
@@ -22,13 +22,36 @@
             justify-content: center;
             padding: 20px;
             overflow-x: hidden;
+            position: relative;
         }
 
-        /* 1. شاشة التحميل (Loading Screen) */
+        /* تأثير الخطوط العسكرية الرقمية بالخلفية */
+        .bg-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(197, 160, 89, 0.015) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(197, 160, 89, 0.015) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* كود الأنيميشن للجزيئات المتحركة في الخلفية */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 1. شاشة التحميل المتقدمة وبصمة التعرف */
         .loading-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #11171d;
+            background: #0d131a;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -37,41 +60,43 @@
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
 
-        .spinner {
-            width: 80px;
-            height: 80px;
-            border: 4px solid rgba(197, 160, 89, 0.1);
-            border-top: 4px solid #c5a059;
+        .radar-box {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #c5a059;
             border-radius: 50%;
-            animation: spin 1.5s linear infinite;
-            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            animation: radarRotate 4s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .radar-scan {
+            width: 100%; height: 100%;
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(90deg, rgba(197, 160, 89, 0.15) 0%, transparent 50%);
         }
+
+        @keyframes radarRotate { 100% { transform: rotate(360deg); } }
 
         .loading-text {
             color: #c5a059;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            letter-spacing: 1px;
-            animation: pulse 1.5s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(197,160,89,0.5);
+            margin-top: 10px;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        /* 2. شاشة إدخال الاسم المبدئي */
+        /* 2. شاشة تصريح الدخول بالاسم */
         .name-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #1a252f;
+            background: #11171d;
             z-index: 999;
-            display: none; /* تفتح بعد اللودنق */
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -79,177 +104,215 @@
         }
 
         .name-box {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(13, 19, 26, 0.85);
             border: 2px solid #c5a059;
             border-radius: 12px;
             padding: 40px 30px;
             width: 100%;
             max-width: 450px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(197, 160, 89, 0.2);
+            backdrop-filter: blur(10px);
         }
 
-        /* المظهر العام للحاوية الرئيسية للموقع */
+        /* الحاوية الأساسية */
         .container {
-            display: none; /* مخفية حتى يكتب اسمه ويضغط تقدم */
+            display: none;
             width: 100%;
-            max-width: 700px;
-            background: rgba(255, 255, 255, 0.03);
+            max-width: 800px;
+            background: rgba(13, 19, 26, 0.75);
             border: 2px solid #c5a059;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(15px);
             text-align: center;
+            z-index: 1;
             margin: auto;
             animation: fadeIn 0.8s ease forwards;
         }
 
-        .badge { font-size: 4rem; margin-bottom: 10px; color: #c5a059; }
-        h1 { color: #c5a059; margin-bottom: 10px; font-size: 2rem; }
-        .subtitle { color: #a0aec0; margin-bottom: 30px; font-size: 1.1rem; }
+        .badge { font-size: 4rem; color: #c5a059; margin-bottom: 5px; }
+        h1 { color: #c5a059; font-size: 2.2rem; margin-bottom: 5px; letter-spacing: 1px; }
+        .subtitle { color: #a0aec0; margin-bottom: 35px; font-size: 1.1rem; }
 
-        .main-buttons { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; }
+        .main-buttons { display: flex; gap: 15px; justify-content: center; margin-bottom: 35px; flex-wrap: wrap; }
         
         .btn {
-            padding: 15px 30px; font-size: 1.1rem; font-weight: bold;
+            padding: 14px 28px; font-size: 1.05rem; font-weight: bold;
             border: none; border-radius: 6px; cursor: pointer;
-            transition: all 0.3s ease; display: flex; align-items: center; gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 10px;
         }
 
-        .btn-laws { background-color: #2c3e50; color: #ffffff; border: 1px solid #34495e; }
-        .btn-laws:hover { background-color: #34495e; transform: translateY(-2px); }
+        .btn-laws { background-color: #243447; color: #ffffff; border: 1px solid #324762; }
+        .btn-laws:hover { background-color: #324762; transform: translateY(-2px); }
+        .btn-sectors { background-color: #1e3d2f; color: #ffffff; border: 1px solid #2d5a45; }
+        .btn-sectors:hover { background-color: #2d5a45; transform: translateY(-2px); }
         .btn-apply { background-color: #c5a059; color: #11171d; }
-        .btn-apply:hover { background-color: #e6bc6b; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4); }
+        .btn-apply:hover { background-color: #e6bc6b; transform: translateY(-2px); box-shadow: 0 0 15px rgba(197, 160, 89, 0.5); }
 
         .content-section {
-            display: none; background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px; padding: 25px; text-align: right;
-            border-top: 3px solid #c5a059; animation: fadeIn 0.5s ease forwards;
+            display: none; background: rgba(8, 12, 17, 0.9);
+            border-radius: 10px; padding: 30px; text-align: right;
+            border-top: 4px solid #c5a059; box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            animation: fadeIn 0.5s ease forwards; margin-top: 10px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .laws-list li { position: relative; padding-right: 30px; margin-bottom: 15px; color: #e2e8f0; line-height: 1.7; }
+        .laws-list li::before { content: "⚡"; position: absolute; right: 0; color: #c5a059; }
+
+        /* استعراض القطاعات العسكرية */
+        .sectors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; margin-top: 15px;
         }
 
-        .laws-list { list-style: none; }
-        .laws-list li { position: relative; padding-right: 25px; margin-bottom: 15px; color: #e2e8f0; line-height: 1.6; }
-        .laws-list li::before { content: "🎖️"; position: absolute; right: 0; top: 0; }
+        .sector-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #4a5568;
+            border-radius: 8px; padding: 20px; text-align: center;
+            transition: all 0.3s ease;
+        }
 
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #c5a059; }
+        .sector-card:hover {
+            border-color: #c5a059; background: rgba(197, 160, 89, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .sector-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+        /* حقول الأسئلة */
+        .form-group { margin-bottom: 22px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #c5a059; font-size: 0.95rem; }
         
         input[type="text"], input[type="number"], textarea, select {
-            width: 100%; padding: 12px; background: #1a252f;
-            border: 1px solid #4a5568; border-radius: 6px; color: #ffffff;
-            font-size: 1rem; transition: border-color 0.3s ease;
+            width: 100%; padding: 13px; background: #131a22;
+            border: 1px solid #3d4a5c; border-radius: 6px; color: #ffffff;
+            font-size: 1rem; transition: all 0.3s ease;
         }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #c5a059; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #c5a059; box-shadow: 0 0 8px rgba(197,160,89,0.3); }
         textarea { resize: vertical; height: 90px; }
 
-        /* 3. تنسيق الـ Checkbox الفخم */
-        .checkbox-group {
-            background: rgba(197, 160, 89, 0.05);
-            border: 1px dashed #c5a059;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: right;
-        }
+        /* الجنايات والسوابق */
+        .record-details { display: none; animation: fadeIn 0.4s ease; margin-top: 12px; }
 
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            color: #e2e8f0;
-            margin-bottom: 10px;
-            user-select: none;
-        }
+        .checkbox-group { background: rgba(197, 160, 89, 0.03); border: 1px dashed #c5a059; border-radius: 6px; padding: 18px; margin-bottom: 20px; }
+        .checkbox-container { display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 0.95rem; color: #e2e8f0; margin-bottom: 12px; user-select: none; }
+        .checkbox-container input { width: 18px; height: 18px; accent-color: #c5a059; cursor: pointer; }
 
-        .checkbox-container:last-child { margin-bottom: 0; }
-
-        .checkbox-container input {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #c5a059; /* لون الـصح عسكري */
-        }
-
-        .btn-submit { background-color: #27ae60; color: white; width: 100%; padding: 15px; font-size: 1.2rem; margin-top: 10px; }
-        .btn-submit:hover { background-color: #2ecc71; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); }
-        .status-msg { text-align: center; margin-top: 15px; font-weight: bold; }
+        .btn-submit { background-color: #1e7e34; color: white; width: 100%; padding: 16px; font-size: 1.2rem; margin-top: 10px; box-shadow: 0 4px 15px rgba(30,126,52,0.3); }
+        .btn-submit:hover { background-color: #218838; box-shadow: 0 4px 20px rgba(40,167,69,0.5); }
+        .status-msg { text-align: center; margin-top: 15px; font-weight: bold; font-size: 1.05rem; }
     </style>
 </head>
 <body>
 
+    <div class="bg-grid"></div>
+    <canvas id="particles-canvas"></canvas>
+
     <div class="loading-screen" id="loadingScreen">
-        <div class="badge" style="animation: pulse 1.5s ease-in-out infinite;">🦅</div>
-        <div class="spinner"></div>
-        <div class="loading-text">جاري الاتصال بالقاعدة العسكرية...</div>
+        <div class="radar-box">
+            <div class="radar-scan"></div>
+            <span style="font-size: 2.5rem;">🦅</span>
+        </div>
+        <div class="loading-text" id="loadingDynamicText">SECURE BOOT: INITIALIZING...</div>
     </div>
 
     <div class="name-screen" id="nameScreen">
         <div class="name-box">
             <div class="badge" style="font-size: 3rem;">🪖</div>
-            <h2 style="color: #c5a059; margin-bottom: 15px;">تصريح الدخول الأمني</h2>
-            <p style="color: #a0aec0; margin-bottom: 25px; font-size: 0.95rem;">الرجاء إدخال اسمك المبدئي للمتابعة للبوابة</p>
-            <input type="text" id="preName" placeholder="اكتب اسمك المستعار أو الحقيقي..." style="text-align: center; margin-bottom: 20px;" required>
-            <button class="btn btn-apply" style="width: 100%; justify-content: center;" onclick="submitName()">تقدم ⚡</button>
+            <h2 style="color: #c5a059; margin-bottom: 10px;">نظام التعريف الموحد</h2>
+            <p style="color: #a0aec0; margin-bottom: 25px; font-size: 0.9rem;">أدخل اسمك المبدئي لإصدار بطاقة عبور للمنظومة</p>
+            <input type="text" id="preName" placeholder="اسم المستخدم المعرّف هنا..." style="text-align: center; margin-bottom: 20px;" required>
+            <button class="btn btn-apply" style="width: 100%; justify-content: center;" onclick="submitName()">تخطي وإصدار التصريح 🔑</button>
         </div>
     </div>
 
     <div class="container" id="mainWebsite">
         <div class="badge">🦅</div>
-        <h1>بوابة التجنيد والتقدم العسكري</h1>
-        <p class="subtitle">مرحباً بك سيادة الجندي: <span id="userBadgeName" style="color: #e6bc6b; font-weight: bold;"></span></p>
+        <h1>منظومة السيطرة والتجنيد المركزي</h1>
+        <p class="subtitle">التصريح الأمني نشط للجندي: <span id="userBadgeName" style="color: #e6bc6b;"></span></p>
 
         <div class="main-buttons">
-            <button class="btn btn-laws" onclick="showSection('laws-section')">📜 القوانين العسكرية</button>
-            <button class="btn btn-apply" onclick="showSection('apply-section')">📝 تقديم طلب جديد</button>
+            <button class="btn btn-laws" onclick="showSection('laws-section')">📜 الأنظمة العسكرية</button>
+            <button class="btn btn-sectors" onclick="showSection('sectors-section')">🛡️ قطاعات المنظومة</button>
+            <button class="btn btn-apply" onclick="showSection('apply-section')">📝 استمارة التجنيد</button>
         </div>
 
         <div id="laws-section" class="content-section">
-            <h2 style="color: #c5a059; margin-bottom: 20px; text-align: center;">الدستور والقوانين العسكرية العامة</h2>
-            <ul class="laws-list">
-                <li>يجب على كل جندي إطاعة الأوامر العسكرية الصادرة من القيادة العليا فوراً ودون نقاش.</li>
-                <li>يُمنع منعاً باتاً تسريب أي معلومات أو خطط عسكرية خارج أسوار القطاع.</li>
-                <li>الاحترام المتبادل بين الرتب العليا والدنيا أساس العمل العسكري المنضبط.</li>
-                <li>الالتزام بالزي الرسمي الكامل والتواجد في مقر العمل في الأوقات المحددة.</li>
-                <li>سوء استخدام الأسلحة العسكرية أو الآليات يعرض صاحبه للمحاكمة العسكرية الفورية.</li>
+            <h3 style="color: #c5a059; margin-bottom: 20px; text-align: center;">ميثاق الشرف والالتزام الأمني</h3>
+            <ul class="laws-list" style="list-style: none;">
+                <li>تنفيذ الأوامر الصادرة من الرتب العليا بشكل فوري وقاطع دون أي اعتراض أو إبطاء.</li>
+                <li>تعتبر كافة التحركات والخطط العسكرية سرية للغاية ويُعاقب مسربها بالفصل والمحاكمة.</li>
+                <li>المحافظة التامة على العتاد العسكري، والآليات، والعهدة والتبليغ عن أي خلل فوراً.</li>
+                <li>الانضباط والتحلي بالزي الرسمي والمظهر العسكري المهيب داخل وخارج قطاع العمل.</li>
             </ul>
         </div>
 
+        <div id="sectors-section" class="content-section">
+            <h3 style="color: #c5a059; margin-bottom: 20px; text-align: center;">القطاعات المتاحة للفرز والتعيين</h3>
+            <div class="sectors-grid">
+                <div class="sector-card">
+                    <div class="sector-icon">⚔️</div>
+                    <h4 style="color: #c5a059; margin-bottom: 5px;">قوات الطوارئ</h4>
+                    <p style="font-size: 0.85rem; color: #a0aec0;">الخط الدفاعي الأول للتعامل مع الأخطار الأمنية الصعبة بحزم.</p>
+                </div>
+                <div class="sector-card">
+                    <div class="sector-icon">🚔</div>
+                    <h4 style="color: #c5a059; margin-bottom: 5px;">الأمن العام / الشرطة</h4>
+                    <p style="font-size: 0.85rem; color: #a0aec0;">فرض النظام وحماية الأرواح والممتلكات داخل المدن.</p>
+                </div>
+                <div class="sector-card">
+                    <div class="sector-icon">🕵️‍♂️</div>
+                    <h4 style="color: #c5a059; margin-bottom: 5px;">المباحث العامة</h4>
+                    <p style="font-size: 0.85rem; color: #a0aec0;">جمع المعلومات الاستخباراتية الاستباقية لإحباط الجرائم.</p>
+                </div>
+            </div>
+        </div>
+
         <div id="apply-section" class="content-section">
-            <h2 style="color: #c5a059; margin-bottom: 20px; text-align: center;">استمارة طلب الانضمام للخدمة</h2>
+            <h3 style="color: #c5a059; margin-bottom: 20px; text-align: center;">ملف التجنيد الإلكتروني</h3>
             
             <form id="militaryForm" onsubmit="sendApplication(event)">
                 <div class="form-group">
-                    <label for="fullName">السؤال 1: اسمك الكامل الحقيقي</label>
-                    <input type="text" id="fullName" required placeholder="اكتب اسمك الثلاثي أو الرباعي">
+                    <label for="fullName">السؤال 1: الاسم الكامل الحقيقي</label>
+                    <input type="text" id="fullName" required placeholder="اكتب الاسم الرباعي كما في الهوية">
                 </div>
 
                 <div class="form-group">
-                    <label for="realAge">السؤال 2: عمرك الحقيقي</label>
+                    <label for="realAge">السؤال 2: العمر الحقيقي</label>
                     <input type="number" id="realAge" required min="15" max="60">
                 </div>
 
                 <div class="form-group">
+                    <label for="hasRecord">سؤال الحوشية: هل لديك أي سوابق جنائية أو قضايا سابقة؟</label>
+                    <select id="hasRecord" required onchange="toggleRecordDetails(this.value)">
+                        <option value="لا">لا، السجل نظيف تماماً</option>
+                        <option value="نعم">نعم، توجد سوابق</option>
+                    </select>
+                    <div id="recordDetailsBox" class="record-details">
+                        <label style="color: #ea4335;" for="recordDetails">يرجى توضيح تفاصيل القضية أو السابقة العسكرية بالتفصيل:</label>
+                        <textarea id="recordDetails" placeholder="اكتب نوع القضية وتاريخها هنا..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label for="reason">السؤال 3: سبب التقديم والانضمام إلينا</label>
-                    <textarea id="reason" required placeholder="اشرح لنا بالتفصيل..."></textarea>
+                    <textarea id="reason" required placeholder="اشرح للقيادة الأسباب التي تجعلك مؤهلاً..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="experience">السؤال 4: اذكر خبراتك السابقة</label>
-                    <textarea id="experience" required placeholder="هل عملت في قطاعات سابقة؟"></textarea>
+                    <textarea id="experience" required placeholder="الدورات، السيرفرات السابقة، القيادات..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="gender">السؤال 5: حدد جنسك</label>
                     <select id="gender" required>
-                        <option value="" disabled selected>اختر الجنس...</option>
                         <option value="ذكر">ذكر</option>
                         <option value="أنثى">أنثى</option>
                     </select>
@@ -257,69 +320,130 @@
 
                 <div class="form-group">
                     <label for="location">السؤال 6: من أين (مكان الإقامة الحالي)؟</label>
-                    <input type="text" id="location" required placeholder="الدولة / المدينة">
+                    <input type="text" id="location" required placeholder="المدينة / المنطقة">
                 </div>
 
                 <div class="checkbox-group">
-                    <label style="font-size: 1rem; margin-bottom: 10px;">📋 التعهدات الأمنية العسكرية:</label>
+                    <label style="font-size: 1rem; margin-bottom: 10px; color: #c5a059; display: block;">📋 الإقرارات القانونية المحمية:</label>
                     <label class="checkbox-container">
-                        <input type="checkbox" id="checkAge" required>
-                        <span>أتعهد وأقسم بالله أن عمري والمعلومات المكتوبة فوق صحيحة 100%.</span>
+                        <input type="checkbox" required>
+                        <span>أقر بأن كافة البيانات المذكورة أعلاه صحيحة وعلى مسؤوليتي الشخصية العسكرية.</span>
                     </label>
                     <label class="checkbox-container">
-                        <input type="checkbox" id="checkLaws" required>
-                        <span>أوافق على الالتزام الكامل بالقوانين العسكرية المذكورة بالموقع وأتحمل العقوبات في حال المخالفة.</span>
+                        <input type="checkbox" required>
+                        <span>أوافق على الخضوع لكافة الفحوصات والفرز الأمني والقرارات الصادرة عن الإدارة العسكرية.</span>
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-submit">📯 إرسال التقديم العسكري</button>
+                <button type="submit" class="btn btn-submit">📯 بث طلب التجنيد الفوري</button>
                 <div id="status" class="status-msg"></div>
             </form>
         </div>
     </div>
 
     <script>
-        // 4. نظام الـ Sound Effects (روابط أصوات عسكرية لاسلكية نظيفة)
-        const clickSound = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3"); // صوت كليك حاد ومميز
-        const successSound = new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3"); // صوت بيب نجاح للاسلكي
+        const clickSound = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3"); 
+        const successSound = new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3"); 
 
-        // محاكاة انتهاء شاشة اللودنق بعد 3 ثواني تلقائياً
+        // تدرج الكلمات في شاشة التحميل بشكل عسكري
+        const words = ["CONNECTING TO CENTRAL DATABASE...", "CHECKING DIGITAL SIGNATURE...", "SCANNING FOR BIOMETRIC DATA...", "ACCESS GRANTED..."];
+        let wordIndex = 0;
+        const textElement = document.getElementById("loadingDynamicText");
+        
+        const wordInterval = setInterval(() => {
+            if(wordIndex < words.length) {
+                textElement.innerText = words[wordIndex];
+                wordIndex++;
+            }
+        }, 700);
+
+        // انتهاء التحميل بعد 3.2 ثانية
         window.addEventListener('DOMContentLoaded', () => {
+            initParticles(); // تشغيل الجزيئات المتحركة بالخلفية فور فتح الصفحة
             setTimeout(() => {
+                clearInterval(wordInterval);
                 const loader = document.getElementById('loadingScreen');
-                loader.style.opacity = '0';
-                loader.style.visibility = 'hidden';
-                
-                // إظهار شاشة الاسم بعد اختفاء اللودنق
-                setTimeout(() => {
-                    document.getElementById('nameScreen').style.display = 'flex';
-                }, 400);
-            }, 3000); // 3 آلاف تعني 3 ثواني لودنق
+                loader.style.opacity = '0'; loader.style.visibility = 'hidden';
+                setTimeout(() => { document.getElementById('nameScreen').style.display = 'flex'; }, 400);
+            }, 3200);
         });
 
-        // دالة زر تقدم بعد كتابة الاسم
+        // 🛠️ برمجة الجزيئات المتحركة الذكية بالخلفية (Animated Background)
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+
+        function initParticles() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // إنشاء جزيئات عشوائية بلون ذهبي عسكري خفيف جداً
+            for (let i = 0; i < 65; i++) {
+                particlesArray.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 0.5,
+                    speedX: (Math.random() - 0.5) * 0.4,
+                    speedY: (Math.random() - 0.5) * 0.4,
+                    alpha: Math.random() * 0.5 + 0.1
+                });
+            }
+            animateParticles();
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particlesArray.length; i++) {
+                let p = particlesArray[i];
+                ctx.fillStyle = `rgba(197, 160, 89, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // تحديث الإحداثيات لجعلها تتحرك بنعومة
+                p.x += p.speedX;
+                p.y += p.speedY;
+
+                // إعادة الجزيء للطرف الآخر إذا خرج من الشاشة
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
         function submitName() {
             const nameInput = document.getElementById('preName').value.trim();
-            if (nameInput === "") {
-                alert("الرجاء كتابة اسمك أولاً للدخول!");
-                return;
-            }
-            clickSound.play(); // تشغيل صوت الكليك
-            
-            // وضع الاسم في القائمة الرئيسية
+            if (nameInput === "") { alert("الرجاء إدخال اسم المصرح له أولاً!"); return; }
+            clickSound.play();
             document.getElementById('userBadgeName').innerText = nameInput;
-            
-            // إخفاء شاشة الاسم وفتح البوابة الأساسية
             document.getElementById('nameScreen').style.display = 'none';
             document.getElementById('mainWebsite').style.display = 'block';
         }
 
         function showSection(sectionId) {
-            clickSound.play(); // تشغيل صوت الكليك عند التنقل بالأزرار
-            document.querySelectorAll('.content-section').forEach(sec => {
-                sec.style.display = 'none';
-            });
+            clickSound.play();
+            document.querySelectorAll('.content-section').forEach(sec => { sec.style.display = 'none'; });
             document.getElementById(sectionId).style.display = 'block';
+        }
+
+        function toggleRecordDetails(val) {
+            const box = document.getElementById("recordDetailsBox");
+            const input = document.getElementById("recordDetails");
+            if(val === "نعم") {
+                box.style.display = "block";
+                input.required = true;
+            } else {
+                box.style.display = "none";
+                input.required = false;
+            }
         }
 
         function sendApplication(event) {
@@ -328,34 +452,35 @@
             const webhookUrl = "https://canary.discord.com/api/webhooks/1515348310628634734/0HQsoivRj9dWBGe4Moy6BfyqzyIsEWZvosYTHd9_cD_VYIFTLcA14mVHRLrKJGmUL3Vt";
             const statusDiv = document.getElementById("status");
             statusDiv.style.color = "#FBBC05";
-            statusDiv.innerText = "جاري بث التقديم مشفر إلى اللاسلكي المركزي... ⚙️";
+            statusDiv.innerText = "جاري تشفير الملف وإرساله عبر تردد اللاسلكي الأمن... 📡";
 
             const name = document.getElementById("fullName").value;
             const age = document.getElementById("realAge").value;
+            const hasRecord = document.getElementById("hasRecord").value;
+            const recordDetails = document.getElementById("recordDetails").value || "لا يوجد";
             const reason = document.getElementById("reason").value;
             const exp = document.getElementById("experience").value;
             const gender = document.getElementById("gender").value;
             const loc = document.getElementById("location").value;
 
             const discordPayload = {
-                username: "اللاسلكي العسكري المركزي",
+                username: "منظومة الاستخبارات العسكرية",
                 avatar_url: "https://i.imgur.com/W2S7v7S.png",
                 embeds: [{
-                    title: "🎖️ طلب تقديم عسكري جديد 🎖️",
-                    description: "تم استقبال ملف تقديم جديد، وإليك تفاصيل المتقدم وموافقته على الشروط العسكرية:",
-                    color: 3447003, // لون كحلي شرطة فخم بالـ Hex-to-Decimal
+                    title: "🚨 ملف تجنيد عسكري جديد بالكامل 🚨",
+                    description: "تم استلام طلب تقديم جديد مشفر عبر البوابة الإلكترونية. تفاصيل السجل والملف الجنائي للمتقدم أدناه:",
+                    color: 14035481, 
                     fields: [
-                        { name: "👤 1. الاسم الكامل:", value: name, inline: true },
-                        { name: "📅 2. العمر الحقيقي:", value: age + " سنة", inline: true },
-                        { name: "🌍 5. الجنس:", value: gender, inline: true },
-                        { name: "📍 6. مكان الإقامة (من أين):", value: loc, inline: true },
-                        { name: "📜 التعهدات الأمنية:", value: "✅ وافق المتقدم على القسم والشروط العسكرية بالكامل", inline: false },
-                        { name: "📝 3. سبب التقديم للقطاع:", value: reason, inline: false },
-                        { name: "🛠️ 4. الخبرات السابقة:", value: exp, inline: false }
+                        { name: "👤 اسم المتقدم:", value: name, inline: true },
+                        { name: "📅 العمر الحقيقي:", value: age + " سنة", inline: true },
+                        { name: "🌍 الجنس:", value: gender, inline: true },
+                        { name: "📍 مكان الإقامة:", value: loc, inline: true },
+                        { name: "⚠️ هل لديه سوابق جنائية؟", value: "🔴 " + hasRecord, inline: true },
+                        { name: "📄 تفاصيل السوابق (إن وجدت):", value: recordDetails, inline: false },
+                        { name: "📝 سبب الرغبة بالانضمام للقطاع:", value: reason, inline: false },
+                        { name: "🛠️ الخبرات والدورات السابقة:", value: exp, inline: false }
                     ],
-                    footer: {
-                        text: "منظومة البيانات العسكرية الآمنة • " + new Date().toLocaleString('ar-EG')
-                    }
+                    footer: { text: "مركز السيطرة والفرز الرقمي الموحد • " + new Date().toLocaleString('ar-EG') }
                 }]
             };
 
@@ -366,18 +491,19 @@
             })
             .then(response => {
                 if(response.ok) {
-                    successSound.play(); // تشغيل صوت النجاح المميز!
+                    successSound.play();
                     statusDiv.style.color = "#2ecc71";
-                    statusDiv.innerText = "✅ تم بث ملفك بنجاح! استمع لإشارات اللاسلكي.";
+                    statusDiv.innerText = "✅ تم تسليم ملفك العسكري المركزي بنجاح! السجل تحت المراجعة الحين.";
                     document.getElementById("militaryForm").reset();
+                    document.getElementById("recordDetailsBox").style.display = "none";
                 } else {
                     statusDiv.style.color = "#e74c3c";
-                    statusDiv.innerText = "❌ فشل الإرسال، تأكد من إعدادات الويب هوك.";
+                    statusDiv.innerText = "❌ فشل إرسال الإشارة اللاسلكية. تفقد الويب هوك.";
                 }
             })
             .catch(error => {
                 statusDiv.style.color = "#e74c3c";
-                statusDiv.innerText = "❌ فشل الاتصال بقاعدة البيانات.";
+                statusDiv.innerText = "❌ انقطع الاتصال بالخادم المركزي.";
             });
         }
     </script>
